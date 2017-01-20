@@ -25,6 +25,7 @@ const (
 	sizeofTCPCCInfo    = 0x10
 	sizeofTCPVegasInfo = 0x10
 	sizeofTCPDCTCPInfo = 0x10
+	sizeofTCPBBRInfo   = 0x10
 )
 
 type tcpInfo struct {
@@ -71,7 +72,7 @@ type tcpInfo struct {
 	Data_segs_out   uint32
 }
 
-type tcpCCInfo [16]byte
+type tcpCCInfo [24]byte
 
 type tcpVegasInfo struct {
 	Enabled uint32
@@ -86,4 +87,12 @@ type tcpDCTCPInfo struct {
 	Alpha    uint32
 	Ab_ecn   uint32
 	Ab_tot   uint32
+}
+
+type tcpBBRInfo struct {
+	BandwidthLo uint32
+	BandwidthHi uint32
+	MinRTT      uint32
+	PacingGain  uint32
+	CWNDGain    uint32
 }

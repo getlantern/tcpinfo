@@ -144,6 +144,56 @@ type CCAlgorithmInfo interface {
 	Algorithm() string
 }
 
+// A VegasInfo represents Vegas congestion control information.
+//
+// Only supported on Linux.
+type VegasInfo struct {
+	Enabled    bool          `json:"enabled"`
+	RoundTrips uint          `json:"rnd_trips"` // # of round-trips
+	RTT        time.Duration `json:"rtt"`       // round-trip time
+	MinRTT     time.Duration `json:"min_rtt"`   // minimum round-trip time
+}
+
+// Algorithm implements the Algorithm method of CCAlgorithmInfo
+// interface.
+func (vi *VegasInfo) Algorithm() string { return "vegas" }
+
+// A CEState represents a state of ECN congestion encountered (CE)
+// codepoint.
+//
+// Only supported on Linux.
+type CEState int
+
+// A DCTCPInfo represents Datacenter TCP congestion control
+// information.
+//
+// Only supported on Linux.
+type DCTCPInfo struct {
+	Enabled         bool    `json:"enabled"`
+	CEState         CEState `json:"ce_state"`    // state of ECN CE codepoint
+	Alpha           uint    `json:"alpha"`       // fraction of bytes sent
+	ECNAckedBytes   uint    `json:"ecn_acked"`   // # of acked bytes with ECN
+	TotalAckedBytes uint    `json:"total_acked"` // total # of acked bytes
+}
+
+// Algorithm implements the Algorithm method of CCAlgorithmInfo
+// interface.
+func (di *DCTCPInfo) Algorithm() string { return "dctcp" }
+
+// A BBRInfo represents BBR congestion control information.
+//
+// Only supported on Linux.
+type BBRInfo struct {
+	EstBandwidth uint `json:"est_bw"`      // estimated bandwidth
+	MinRTT       uint `json:"min_rtt"`     // minimum filtered RTT in microseconds
+	PacingGain   uint `json:"pacing_gain"` // pacing gain
+	CWNDGain     uint `json:"cwnd_gain"`   // cwnd gain
+}
+
+// Algorithm implements the Algorithm method of CCAlgorithmInfo
+// interface.
+func (di *BBRInfo) Algorithm() string { return "bbr" }
+
 // ParseCCAlgorithm parses congestion control algorithm information.
 //
 // Only supported on Linux.

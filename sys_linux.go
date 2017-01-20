@@ -133,36 +133,6 @@ func parseInfo(b []byte) (tcpopt.Option, error) {
 	return i, nil
 }
 
-// A VegasInfo represents Vegas congestion control information.
-type VegasInfo struct {
-	Enabled    bool          `json:"enabled"`
-	RoundTrips uint          `json:"rnd_trips"` // # of round-trips
-	RTT        time.Duration `json:"rtt"`       // round-trip time
-	MinRTT     time.Duration `json:"min_rtt"`   // minimum round-trip time
-}
-
-// Algorithm implements the Algorithm method of CCAlgorithmInfo
-// interface.
-func (vi *VegasInfo) Algorithm() string { return "vegas" }
-
-// A CEState represents a state of ECN congestion encountered (CE)
-// codepoint.
-type CEState int
-
-// A DCTCPInfo represents Datacenter TCP congestion control
-// information.
-type DCTCPInfo struct {
-	Enabled         bool    `json:"enabled"`
-	CEState         CEState `json:"ce_state"`    // state of ECN CE codepoint
-	Alpha           uint    `json:"alpha"`       // fraction of bytes sent
-	ECNAckedBytes   uint    `json:"ecn_acked"`   // # of acked bytes with ECN
-	TotalAckedBytes uint    `json:"total_acked"` // total # of acked bytes
-}
-
-// Algorithm implements the Algorithm method of CCAlgorithmInfo
-// interface.
-func (di *DCTCPInfo) Algorithm() string { return "dctcp" }
-
 func parseCCAlgorithmInfo(name string, b []byte) (CCAlgorithmInfo, error) {
 	if strings.HasPrefix(name, "dctcp") {
 		if len(b) < sizeofTCPDCTCPInfo {
@@ -172,6 +142,19 @@ func parseCCAlgorithmInfo(name string, b []byte) (CCAlgorithmInfo, error) {
 		di := &DCTCPInfo{Alpha: uint(sdi.Alpha)}
 		if sdi.Enabled != 0 {
 			di.Enabled = true
+		}
+		return di, nil
+	}
+	if strings.HasPrefix(name, "bbr") {
+		if len(b) < sizeofTCPBBRInfo {
+			return nil, errors.New("short buffer")
+		}
+		sdi := (*tcpBBRInfo)(unsafe.Pointer(&b[0]))
+		di := &BBRInfo{
+			EstBandwidth: uint(sdi.BandwidthHi)<<8 + uint(sdi.BandwidthLo),
+			MinRTT:       uint(sdi.MinRTT),
+			PacingGain:   uint(sdi.PacingGain),
+			CWNDGain:     uint(sdi.CWNDGain),
 		}
 		return di, nil
 	}
