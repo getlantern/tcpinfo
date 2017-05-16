@@ -22,6 +22,14 @@ var options = [soMax]option{
 // Marshal implements the Marshal method of tcpopt.Option interface.
 func (i *Info) Marshal() ([]byte, error) { return (*[sizeofTCPInfo]byte)(unsafe.Pointer(i))[:], nil }
 
+func (i *Info) Size() int {
+	return sizeofTCPInfo
+}
+
+func (i *BBRInfo) Size() int {
+	return sizeofTCPBBRInfo
+}
+
 // A CAState represents a state of congestion avoidance.
 type CAState int
 
