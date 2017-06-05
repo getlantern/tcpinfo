@@ -142,11 +142,12 @@ func parseInfo(b []byte) (tcpopt.Option, error) {
 }
 
 func parseCCAlgorithmInfo(name string, b []byte) (CCAlgorithmInfo, error) {
+	pt := unsafe.Pointer(&b[0])
 	if strings.HasPrefix(name, "dctcp") {
 		if len(b) < sizeofTCPDCTCPInfo {
 			return nil, errors.New("short buffer")
 		}
-		sdi := (*tcpDCTCPInfo)(unsafe.Pointer(&b[0]))
+		sdi := (*tcpDCTCPInfo)(pt)
 		di := &DCTCPInfo{Alpha: uint(sdi.Alpha)}
 		if sdi.Enabled != 0 {
 			di.Enabled = true
@@ -157,7 +158,7 @@ func parseCCAlgorithmInfo(name string, b []byte) (CCAlgorithmInfo, error) {
 		if len(b) < sizeofTCPBBRInfo {
 			return nil, errors.New("short buffer")
 		}
-		sdi := (*tcpBBRInfo)(unsafe.Pointer(&b[0]))
+		sdi := (*tcpBBRInfo)(pt)
 		di := &BBRInfo{
 			EstBandwidth: uint(sdi.BandwidthHi)<<8 + uint(sdi.BandwidthLo),
 			MinRTT:       uint(sdi.MinRTT),
@@ -169,7 +170,7 @@ func parseCCAlgorithmInfo(name string, b []byte) (CCAlgorithmInfo, error) {
 	if len(b) < sizeofTCPVegasInfo {
 		return nil, errors.New("short buffer")
 	}
-	svi := (*tcpVegasInfo)(unsafe.Pointer(&b[0]))
+	svi := (*tcpVegasInfo)(pt)
 	vi := &VegasInfo{
 		RoundTrips: uint(svi.Rttcnt),
 		RTT:        time.Duration(svi.Rtt) * time.Microsecond,
